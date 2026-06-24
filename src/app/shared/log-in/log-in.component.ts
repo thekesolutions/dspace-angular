@@ -12,6 +12,7 @@ import {
   getAuthenticationError,
   isAuthenticated,
   isAuthenticationLoading,
+  isMfaRequired,
 } from '@dspace/core/auth/selectors';
 import { CoreState } from '@dspace/core/core-state.model';
 import { hasValue } from '@dspace/shared/utils/empty.util';
@@ -24,6 +25,7 @@ import { Observable } from 'rxjs';
 import { ThemedLoadingComponent } from '../loading/themed-loading.component';
 import { LogInContainerComponent } from './container/log-in-container.component';
 import { AUTH_METHOD_FOR_DECORATOR_MAP } from './methods/log-in.methods-decorator';
+import { LogInMfaComponent } from './methods/mfa/log-in-mfa.component';
 import { AuthMethodsService } from './services/auth-methods.service';
 
 @Component({
@@ -34,6 +36,7 @@ import { AuthMethodsService } from './services/auth-methods.service';
   imports: [
     AsyncPipe,
     LogInContainerComponent,
+    LogInMfaComponent,
     ThemedLoadingComponent,
   ],
 })
@@ -67,6 +70,11 @@ export class LogInComponent implements OnInit {
   public isAuthenticated: Observable<boolean>;
 
   /**
+   * Whether MFA verification is required.
+   */
+  public mfaRequired: Observable<boolean>;
+
+  /**
    * True if the authentication is loading.
    * @type {boolean}
    */
@@ -86,6 +94,9 @@ export class LogInComponent implements OnInit {
 
     // set isAuthenticated
     this.isAuthenticated = this.store.pipe(select(isAuthenticated));
+
+    // set mfaRequired
+    this.mfaRequired = this.store.pipe(select(isMfaRequired));
 
     // Clear the redirect URL if an authentication error occurs and this is not a standalone page
     this.store.pipe(select(getAuthenticationError)).subscribe((error) => {
